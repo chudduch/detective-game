@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Простой тест</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        button { margin: 5px; padding: 10px; }
+        pre { background: #f0f0f0; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Простой тест API</h1>
+    
+    <div>
+        <button onclick="testHealth()">Тест /api/health</button>
+        <button onclick="register()">Регистрация</button>
+        <button onclick="login()">Вход</button>
+    </div>
+    
+    <h3>Результат:</h3>
+    <pre id="output">Нажмите кнопку...</pre>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        async function testHealth() {
+            output.textContent = 'Запрос /api/health...';
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                output.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                output.textContent = 'Ошибка: ' + error.message;
+            }
+        }
+        
+        async function register() {
+            output.textContent = 'Регистрация...';
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        username: 'Детектив',
+                        password: '123456'
+                    })
+                });
+                const data = await response.json();
+                output.textContent = JSON.stringify(data, null, 2);
+                
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    output.textContent += '\n\nТокен сохранён в localStorage';
+                }
+            } catch (error) {
+                output.textContent = 'Ошибка: ' + error.message;
+            }
+        }
+        
+        async function login() {
+            output.textContent = 'Вход...';
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: '123456'
+                    })
+                });
+                const data = await response.json();
+                output.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                output.textContent = 'Ошибка: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
