@@ -1,0 +1,30 @@
+{
+  "name": "detective-quartet",
+  "version": "1.0.0",
+  "description": "Кооперативная детективная игра с полной регистрацией",
+  "main": "src/server/index.js",
+  "scripts": {
+    "dev": "nodemon src/server/index.js",
+    "start": "node src/server/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.6.2",
+    "cors": "^2.8.6",
+    "express": "^4.22.1",
+    "jsonwebtoken": "^9.0.3",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  },
+  "keywords": [
+    "game",
+    "multiplayer",
+    "detective",
+    "sqlite"
+  ],
+  "author": "Твоё имя",
+  "license": "MIT"
+}
