@@ -21,8 +21,124 @@ const appState = {
     isReady: false,
     isCreator: false,
     gameState: null,
-    roomsList: []
+    roomsList: [],
+    roomsUpdateTimeout: null,
+    // ⭐ ДОБАВЛЕНО: Локальное хранилище комнат
+    localRooms: new Map()
 };
+
+// ⭐ ИСПРАВЛЕНО: Проверяем, не объявлен ли уже api
+if (typeof window.api === 'undefined') {
+    // ⭐ ДОБАВЛЕНО: Простой API объект для совместимости
+    window.api = {
+        async getUser(userId) {
+            try {
+                // Если есть аутентификация, используем ее данные
+                if (auth.currentUser) {
+                    return {
+                        success: true,
+                        user: auth.currentUser
+                    };
+                }
+                
+                // Или просто возвращаем базовые данные
+                const token = localStorage.getItem('detective_token');
+                if (token) {
+                    const response = await fetch('/api/user/profile', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                }
+                
+                return {
+                    success: false,
+                    error: 'Пользователь не найден'
+                };
+            } catch (error) {
+                console.error('API getUser error:', error);
+                return {
+                    success: false,
+                    error: error.message
+                };
+            }
+        },
+        
+        async getLeaderboard(limit = 10) {
+            try {
+                const response = await fetch(`/api/leaderboard?limit=${limit}`);
+                if (response.ok) {
+                    return await response.json();
+                }
+                return {
+                    success: false,
+                    error: 'Ошибка загрузки рейтинга'
+                };
+            } catch (error) {
+                console.error('API getLeaderboard error:', error);
+                return {
+                    success: false,
+                    error: error.message
+                };
+            }
+        },
+        
+        async checkHealth() {
+            try {
+                const response = await fetch('/api/health');
+                if (response.ok) {
+                    return await response.json();
+                }
+                return {
+                    status: 'error',
+                    message: 'Сервер не отвечает'
+                };
+            } catch (error) {
+                console.error('API health check error:', error);
+                return {
+                    status: 'offline',
+                    message: error.message
+                };
+            }
+        }
+    };
+}
+
+// ⭐ ИСПРАВЛЕНО: Упрощенная функция загрузки профиля
+async function loadUserProfile() {
+    if (!auth.currentUser) return;
+    
+    try {
+        // Используем данные из auth.currentUser напрямую
+        const user = auth.currentUser;
+        
+        // Обновляем UI
+        document.getElementById('profile-username').textContent = user.display_name || user.username;
+        document.getElementById('profile-email').textContent = user.email;
+        document.getElementById('profile-rating').textContent = user.rating || 1000;
+        document.getElementById('profile-rank').textContent = user.rank?.name || 'Новичок';
+        
+        document.getElementById('stat-games').textContent = user.games_played || 0;
+        document.getElementById('stat-wins').textContent = user.games_won || 0;
+        document.getElementById('stat-winrate').textContent = `${user.win_rate || 0}%`;
+        
+        if (user.best_time) {
+            const minutes = Math.floor(user.best_time / 60);
+            const seconds = user.best_time % 60;
+            document.getElementById('stat-best-time').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        console.log('[DEBUG] Профиль загружен из auth.currentUser');
+        
+    } catch (error) {
+        console.error('Ошибка загрузки профиля:', error);
+    }
+}
 
 function initEventListeners() {
     // Навигация
@@ -278,11 +394,27 @@ function initSocketHandlers() {
     
     // Комната создана
     socket.on('room:created', (data) => {
+        console.log('[DEBUG] Комната создана:', data);
         appState.currentRoom = data.roomId;
         appState.isCreator = true;
         updateRoomUI(data.room);
         showActiveRoomSection();
         auth.showNotification('Комната создана!', 'success');
+        
+        // ⭐ ИСПРАВЛЕНО: Сохраняем комнату в локальное хранилище
+        if (data.room) {
+            appState.localRooms.set(data.roomId, data.room);
+            console.log('[DEBUG] Комната сохранена в локальное хранилище');
+        }
+        
+        // ⭐ ИСПРАВЛЕНО: Отправляем уведомление через socketManager
+        if (window.socketManager && window.socketManager.socket) {
+            window.socketManager.socket.emit('broadcast_room_update', {
+                action: 'created',
+                room: data.room
+            });
+            console.log('[DEBUG] Отправлено broadcast уведомление о комнате');
+        }
     });
     
     // Обновление комнаты
@@ -342,9 +474,38 @@ function initSocketHandlers() {
     });
     
     // Обновление списка комнат
-    socket.on('rooms:updated', async (data) => {
-        if (data.action === 'created' || data.action === 'updated' || data.action === 'deleted') {
-            await loadRoomsList();
+    socket.on('rooms:updated', (data) => {
+        console.log('[DEBUG] Получено обновление комнат:', data);
+        
+        if (data.action === 'created' && data.room) {
+            // ⭐ ИСПРАВЛЕНО: Сохраняем комнату и показываем
+            appState.localRooms.set(data.room.id, data.room);
+            console.log('[DEBUG] Получена новая комната от другого игрока:', data.room.name);
+            
+            // Обновляем UI если мы в лобби
+            if (document.getElementById('lobby-screen').classList.contains('active')) {
+                addNewRoomToList(data.room);
+                auth.showNotification(`Создана новая комната: ${data.room.name}`, 'info');
+            }
+        } else if (data.action === 'updated' && data.room) {
+            // Обновляем существующую комнату
+            updateRoomInList(data.room);
+        } else if (data.action === 'deleted' && data.roomId) {
+            // Удаляем комнату из списка
+            removeRoomFromList(data.roomId);
+            appState.localRooms.delete(data.roomId);
+        }
+    });
+    
+    // ⭐ ДОБАВЛЕНО: Обработчик прямого события о новой комнате
+    socket.on('room:new', (roomData) => {
+        console.log('[DEBUG] Прямое событие о новой комнате:', roomData);
+        if (roomData && roomData.id) {
+            appState.localRooms.set(roomData.id, roomData);
+            
+            if (document.getElementById('lobby-screen').classList.contains('active')) {
+                addNewRoomToList(roomData);
+            }
         }
     });
     
@@ -374,38 +535,6 @@ function initSocketHandlers() {
     });
 }
 
-// ===== ФУНКЦИИ ПРОФИЛЯ =====
-
-async function loadUserProfile() {
-    if (!auth.currentUser) return;
-    
-    try {
-        const result = await api.getUser(auth.currentUser.userId);
-        if (result.success && result.user) {
-            const user = result.user;
-            
-            // Обновляем UI
-            document.getElementById('profile-username').textContent = user.display_name || user.username;
-            document.getElementById('profile-email').textContent = user.email;
-            document.getElementById('profile-rating').textContent = user.rating || 1000;
-            document.getElementById('profile-rank').textContent = user.rank?.name || 'Новичок';
-            
-            document.getElementById('stat-games').textContent = user.games_played || 0;
-            document.getElementById('stat-wins').textContent = user.games_won || 0;
-            document.getElementById('stat-winrate').textContent = `${user.win_rate || 0}%`;
-            
-            if (user.best_time) {
-                const minutes = Math.floor(user.best_time / 60);
-                const seconds = user.best_time % 60;
-                document.getElementById('stat-best-time').textContent = 
-                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            }
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки профиля:', error);
-    }
-}
-
 // ===== ФУНКЦИИ ЛОББИ =====
 
 async function enterLobby() {
@@ -413,11 +542,14 @@ async function enterLobby() {
         // Подключаемся к WebSocket если не подключены
         await socketManager.checkConnection();
         
-        // Загружаем список комнат
-        await loadRoomsList();
-        
         // Показываем экран лобби
         auth.showScreen('lobby-screen');
+        
+        // Загружаем список комнат из локального хранилища
+        showLocalRooms();
+        
+        // Запускаем автообновление комнат (только для WebSocket событий)
+        startRoomsAutoRefresh();
         
     } catch (error) {
         auth.showNotification(`Ошибка входа в лобби: ${error.message}`, 'error');
@@ -425,69 +557,220 @@ async function enterLobby() {
     }
 }
 
+// ⭐ ИСПРАВЛЕНО: Упрощенная функция загрузки комнат
 async function loadRoomsList() {
     const roomsList = document.getElementById('rooms-list');
+    if (!roomsList) return;
     
     try {
         roomsList.innerHTML = '<div class="loading">Загрузка комнат...</div>';
+        console.log('[DEBUG] Пробуем получить комнаты...');
         
-        const result = await socketManager.getRoomsList();
+        // ⭐ ИЗМЕНЕНО: Просто показываем локальные комнаты
+        showLocalRooms();
         
-        if (result.success && result.rooms) {
-            if (result.rooms.length === 0) {
-                roomsList.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-search"></i>
-                        <p>Нет доступных комнат</p>
-                        <p class="hint">Создайте новую комнату или подождите</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '';
-            result.rooms.forEach(room => {
-                html += `
-                    <div class="room-item" data-room-id="${room.id}">
-                        <div class="room-info">
-                            <div class="room-name">${room.name}</div>
-                            <div class="room-meta">
-                                <span class="room-creator">
-                                    <i class="fas fa-user"></i> ${room.creator_name}
-                                </span>
-                                <span class="room-players-count">
-                                    <i class="fas fa-users"></i> ${room.player_count}/${room.max_players}
-                                </span>
-                                <span class="room-status ${room.status}">
-                                    ${room.status === 'waiting' ? 'Ожидание' : 'Начинается'}
-                                </span>
-                            </div>
-                        </div>
-                        <button class="btn btn-small join-room-btn" data-room-id="${room.id}">
-                            <i class="fas fa-door-open"></i> Присоединиться
-                        </button>
-                    </div>
-                `;
-            });
-            
-            roomsList.innerHTML = html;
-            
-            // Добавляем обработчики для кнопок присоединения
-            document.querySelectorAll('.join-room-btn').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const roomId = e.currentTarget.getAttribute('data-room-id');
-                    await joinRoom(roomId);
-                });
-            });
-        }
     } catch (error) {
+        console.error('[ERROR] Ошибка загрузки комнат:', error);
+        
+        // Все равно показываем локальные комнаты
+        showLocalRooms();
+    }
+}
+
+// ⭐ ДОБАВЛЕНО: Показ комнат из локального хранилища
+function showLocalRooms() {
+    const roomsList = document.getElementById('rooms-list');
+    if (!roomsList) return;
+    
+    const localRooms = Array.from(appState.localRooms.values());
+    console.log('[DEBUG] Показываем локальные комнаты:', localRooms.length);
+    
+    if (localRooms.length === 0) {
         roomsList.innerHTML = `
-            <div class="empty-state error">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Ошибка загрузки комнат</p>
-                <p class="hint">${error.message}</p>
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <p>Нет доступных комнат</p>
+                <p class="hint">Создайте новую комнату или подождите, пока кто-то создаст</p>
             </div>
         `;
+        return;
+    }
+    
+    let html = '';
+    localRooms.forEach(room => {
+        html += `
+            <div class="room-item" data-room-id="${room.id}">
+                <div class="room-info">
+                    <div class="room-name">${room.name || 'Без названия'}</div>
+                    <div class="room-meta">
+                        <span class="room-creator">
+                            <i class="fas fa-user"></i> ${room.creator_name || room.creator || 'Игрок'}
+                        </span>
+                        <span class="room-players-count">
+                            <i class="fas fa-users"></i> ${room.player_count || 1}/${room.max_players || 4}
+                        </span>
+                        <span class="room-status ${room.status || 'waiting'}">
+                            ${(room.status || 'waiting') === 'waiting' ? 'Ожидание' : 'Начинается'}
+                        </span>
+                    </div>
+                </div>
+                <button class="btn btn-small join-room-btn" data-room-id="${room.id}">
+                    <i class="fas fa-door-open"></i> Присоединиться
+                </button>
+            </div>
+        `;
+    });
+    
+    roomsList.innerHTML = html;
+    appState.roomsList = localRooms;
+    
+    // Добавляем обработчики для кнопок присоединения
+    document.querySelectorAll('.join-room-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const roomId = e.currentTarget.getAttribute('data-room-id');
+            await joinRoom(roomId);
+        });
+    });
+    
+    console.log('[DEBUG] Показано локальных комнат:', localRooms.length);
+}
+
+// ⭐ ДОБАВЛЕНО: Функция для добавления новой комнаты в список
+function addNewRoomToList(roomData) {
+    const roomsList = document.getElementById('rooms-list');
+    if (!roomsList) return;
+    
+    console.log('[DEBUG] Добавление комнаты в список:', roomData.name);
+    
+    // Убираем сообщение "нет комнат"
+    const emptyState = roomsList.querySelector('.empty-state');
+    if (emptyState) {
+        emptyState.remove();
+    }
+    
+    // Проверяем, нет ли уже такой комнаты
+    const existingRoom = roomsList.querySelector(`[data-room-id="${roomData.id}"]`);
+    if (existingRoom) {
+        console.log('[DEBUG] Комната уже есть, обновляем...');
+        // Обновляем существующую
+        existingRoom.querySelector('.room-name').textContent = roomData.name;
+        existingRoom.querySelector('.room-players-count').innerHTML = 
+            `<i class="fas fa-users"></i> ${roomData.player_count || 1}/${roomData.max_players || 4}`;
+        return;
+    }
+    
+    // Добавляем новую комнату
+    const roomElement = document.createElement('div');
+    roomElement.className = 'room-item';
+    roomElement.setAttribute('data-room-id', roomData.id);
+    
+    roomElement.innerHTML = `
+        <div class="room-info">
+            <div class="room-name">${roomData.name || 'Без названия'}</div>
+            <div class="room-meta">
+                <span class="room-creator">
+                    <i class="fas fa-user"></i> ${roomData.creator_name || roomData.creator || 'Игрок'}
+                </span>
+                <span class="room-players-count">
+                    <i class="fas fa-users"></i> ${roomData.player_count || 1}/${roomData.max_players || 4}
+                </span>
+                <span class="room-status ${roomData.status || 'waiting'}">
+                    ${(roomData.status || 'waiting') === 'waiting' ? 'Ожидание' : 'Начинается'}
+                </span>
+            </div>
+        </div>
+        <button class="btn btn-small join-room-btn" data-room-id="${roomData.id}">
+            <i class="fas fa-door-open"></i> Присоединиться
+        </button>
+    `;
+    
+    roomsList.prepend(roomElement); // Добавляем в начало
+    
+    // Добавляем обработчик
+    const joinBtn = roomElement.querySelector('.join-room-btn');
+    joinBtn.addEventListener('click', async (e) => {
+        const roomId = e.currentTarget.getAttribute('data-room-id');
+        await joinRoom(roomId);
+    });
+    
+    // Обновляем локальное хранилище
+    appState.localRooms.set(roomData.id, roomData);
+    
+    console.log('[DEBUG] Комната добавлена в локальное хранилище');
+}
+
+// ⭐ ДОБАВЛЕНО: Обновление комнаты в списке
+function updateRoomInList(roomData) {
+    const roomElement = document.querySelector(`[data-room-id="${roomData.id}"]`);
+    if (roomElement) {
+        roomElement.querySelector('.room-players-count').innerHTML = 
+            `<i class="fas fa-users"></i> ${roomData.player_count || 1}/${roomData.max_players || 4}`;
+        
+        // Обновляем статус если изменился
+        if (roomData.status) {
+            const statusElement = roomElement.querySelector('.room-status');
+            statusElement.className = `room-status ${roomData.status}`;
+            statusElement.textContent = roomData.status === 'waiting' ? 'Ожидание' : 'Начинается';
+        }
+    }
+}
+
+// ⭐ ДОБАВЛЕНО: Удаление комнаты из списка
+function removeRoomFromList(roomId) {
+    const roomElement = document.querySelector(`[data-room-id="${roomId}"]`);
+    if (roomElement) {
+        roomElement.remove();
+        
+        // Убираем из локального хранилища
+        appState.localRooms.delete(roomId);
+        
+        // Если список пуст, показываем сообщение
+        const roomsList = document.getElementById('rooms-list');
+        if (roomsList.children.length === 0) {
+            roomsList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-search"></i>
+                    <p>Нет доступных комнат</p>
+                    <p class="hint">Создайте новую комнату или подождите</p>
+                </div>
+            `;
+        }
+        
+        console.log('[DEBUG] Комната удалена из списка:', roomId);
+    }
+}
+
+// ⭐ ИЗМЕНЕНО: Автообновление комнат (только для очистки старых комнат)
+function startRoomsAutoRefresh() {
+    stopRoomsAutoRefresh(); // Очищаем предыдущий
+    
+    // Только для удаления комнат старше 30 минут
+    appState.roomsUpdateTimeout = setInterval(() => {
+        if (document.getElementById('lobby-screen').classList.contains('active')) {
+            cleanupOldRooms();
+        }
+    }, 30000); // Каждые 30 секунд
+}
+
+// ⭐ ДОБАВЛЕНО: Очистка старых комнат
+function cleanupOldRooms() {
+    const now = Date.now();
+    const thirtyMinutes = 30 * 60 * 1000;
+    
+    for (const [roomId, room] of appState.localRooms) {
+        if (room.createdAt && (now - new Date(room.createdAt).getTime() > thirtyMinutes)) {
+            console.log('[DEBUG] Удаляем старую комнату:', room.name);
+            appState.localRooms.delete(roomId);
+            removeRoomFromList(roomId);
+        }
+    }
+}
+
+// ⭐ ДОБАВЛЕНО: Остановка автообновления
+function stopRoomsAutoRefresh() {
+    if (appState.roomsUpdateTimeout) {
+        clearInterval(appState.roomsUpdateTimeout);
+        appState.roomsUpdateTimeout = null;
     }
 }
 
@@ -527,12 +810,26 @@ async function createRoomFromModal() {
 async function createRoom(roomName, maxPlayers) {
     try {
         auth.showNotification('Создание комнаты...', 'info');
+        console.log('[DEBUG] Создание комнаты:', { roomName, maxPlayers });
+        
         const result = await socketManager.createRoom(roomName, maxPlayers);
         
         if (result.success) {
-            // Уже обрабатывается в socket.on('room:created')
+            console.log('[DEBUG] Комната успешно создана:', result);
+            
+            // Добавляем в локальное хранилище
+            if (result.room) {
+                const roomData = {
+                    ...result.room,
+                    createdAt: new Date().toISOString(),
+                    creator_name: auth.currentUser?.username || 'Игрок'
+                };
+                appState.localRooms.set(result.roomId, roomData);
+                console.log('[DEBUG] Комната добавлена в локальное хранилище');
+            }
         }
     } catch (error) {
+        console.error('[ERROR] Ошибка создания комнаты:', error);
         auth.showNotification(`Ошибка создания комнаты: ${error.message}`, 'error');
     }
 }
@@ -562,6 +859,9 @@ function showActiveRoomSection() {
     activeRoomSection.classList.remove('hidden');
     createRoomSection.style.display = 'none';
     roomsSection.style.display = 'none';
+    
+    // Останавливаем автообновление при входе в комнату
+    stopRoomsAutoRefresh();
 }
 
 function hideActiveRoomSection() {
@@ -584,6 +884,12 @@ function hideActiveRoomSection() {
     document.getElementById('chat-input-field').value = '';
     document.getElementById('ready-btn').innerHTML = '<i class="fas fa-check"></i> Готов';
     document.getElementById('start-game-btn').style.display = 'none';
+    
+    // Запускаем автообновление при выходе из комнаты
+    if (document.getElementById('lobby-screen').classList.contains('active')) {
+        startRoomsAutoRefresh();
+        showLocalRooms(); // Обновляем список
+    }
 }
 
 function updateRoomUI(roomData) {
@@ -927,3 +1233,8 @@ function initServerStatus() {
     checkServer();
     setInterval(checkServer, 30000);
 }
+
+// Очистка при закрытии
+window.addEventListener('beforeunload', () => {
+    stopRoomsAutoRefresh();
+});
