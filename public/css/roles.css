@@ -1,0 +1,1036 @@
+/* Стили для различных ролей в Detective Mastermind */
+
+/* Общие стили для интерфейсов ролей */
+.role-interface {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.role-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.role-section h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+    color: var(--light-color);
+    font-size: 1.2rem;
+}
+
+.role-section h3 i {
+    font-size: 1.2em;
+}
+
+/* Стили для конкретных ролей */
+
+/* ==================== ИНТЕРФЕЙС СЛЕДОВАТЕЛЯ ==================== */
+.investigator-interface .role-header {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.3), rgba(41, 128, 185, 0.3));
+    border-left: 4px solid var(--investigator-color);
+}
+
+.investigator-interface .role-icon {
+    background: linear-gradient(135deg, var(--investigator-color), var(--primary-dark));
+    color: white;
+}
+
+/* Панель документов */
+.documents-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-md);
+}
+
+.document-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    border: 1px solid rgba(52, 152, 219, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.document-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--investigator-color);
+}
+
+.document-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(52, 152, 219, 0.2);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-sm);
+    color: var(--investigator-color);
+}
+
+.document-title {
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+    color: var(--light-color);
+}
+
+.document-description {
+    font-size: 0.9rem;
+    color: var(--gray-color);
+    margin-bottom: var(--space-sm);
+}
+
+.document-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--gray-dark);
+}
+
+/* Панель базы данных */
+.database-search {
+    margin-bottom: var(--space-lg);
+}
+
+.search-bar {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.search-bar input {
+    flex: 1;
+    padding: var(--space-md);
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid var(--gray-color);
+    border-radius: var(--radius-md);
+    color: var(--light-color);
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: var(--investigator-color);
+}
+
+.search-results {
+    max-height: 300px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+}
+
+.database-record {
+    padding: var(--space-md);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-sm);
+    border-left: 3px solid var(--investigator-color);
+}
+
+.record-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-xs);
+}
+
+.record-name {
+    font-weight: 600;
+    color: var(--investigator-color);
+}
+
+.record-type {
+    font-size: 0.8rem;
+    background: rgba(52, 152, 219, 0.2);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+}
+
+.record-info {
+    font-size: 0.9rem;
+    color: var(--gray-color);
+}
+
+/* Панель официальных запросов */
+.request-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-md);
+}
+
+.request-button {
+    padding: var(--space-lg);
+    background: rgba(52, 152, 219, 0.1);
+    border: 2px solid var(--investigator-color);
+    border-radius: var(--radius-md);
+    color: var(--light-color);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    text-align: center;
+}
+
+.request-button:hover:not(:disabled) {
+    background: rgba(52, 152, 219, 0.2);
+    transform: translateY(-2px);
+}
+
+.request-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: var(--gray-color);
+}
+
+.request-button i {
+    font-size: 1.5rem;
+    color: var(--investigator-color);
+}
+
+.request-button .cooldown {
+    font-size: 0.8rem;
+    color: var(--warning-color);
+    margin-top: var(--space-xs);
+}
+
+/* ==================== ИНТЕРФЕЙС КРИМИНАЛИСТА ==================== */
+.forensic-interface .role-header {
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.3), rgba(39, 174, 96, 0.3));
+    border-left: 4px solid var(--forensic-color);
+}
+
+.forensic-interface .role-icon {
+    background: linear-gradient(135deg, var(--forensic-color), var(--secondary-dark));
+    color: white;
+}
+
+/* Микроскопная панель */
+.microscope-view {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    border: 2px solid rgba(46, 204, 113, 0.3);
+    margin-bottom: var(--space-lg);
+}
+
+.microscope-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.microscope-controls {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.control-button {
+    width: 40px;
+    height: 40px;
+    background: rgba(46, 204, 113, 0.2);
+    border: 1px solid var(--forensic-color);
+    border-radius: var(--radius-sm);
+    color: var(--forensic-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.control-button:hover {
+    background: rgba(46, 204, 113, 0.3);
+}
+
+.microscope-display {
+    height: 200px;
+    background: linear-gradient(135deg, #000428, #004e92);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: var(--space-md);
+}
+
+.microscope-image {
+    max-width: 100%;
+    max-height: 100%;
+    transition: transform 0.3s ease;
+}
+
+.zoom-level {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--gray-color);
+}
+
+/* Лабораторные инструменты */
+.lab-tools {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-md);
+}
+
+.tool-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    border: 1px solid rgba(46, 204, 113, 0.2);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tool-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--forensic-color);
+    background: rgba(46, 204, 113, 0.1);
+}
+
+.tool-icon {
+    font-size: 2rem;
+    color: var(--forensic-color);
+    margin-bottom: var(--space-sm);
+}
+
+.tool-name {
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+}
+
+.tool-desc {
+    font-size: 0.8rem;
+    color: var(--gray-color);
+}
+
+/* Научные отчеты */
+.forensic-reports {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.report-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin-bottom: var(--space-sm);
+    border-left: 3px solid var(--forensic-color);
+}
+
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+}
+
+.report-title {
+    font-weight: 600;
+    color: var(--forensic-color);
+}
+
+.report-confidence {
+    font-size: 0.8rem;
+    background: rgba(46, 204, 113, 0.2);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+}
+
+.report-data {
+    font-size: 0.9rem;
+    color: var(--gray-color);
+    font-family: var(--font-mono);
+}
+
+/* ==================== ИНТЕРФЕЙС ЖУРНАЛИСТА ==================== */
+.journalist-interface .role-header {
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.3), rgba(192, 57, 43, 0.3));
+    border-left: 4px solid var(--journalist-color);
+}
+
+.journalist-interface .role-icon {
+    background: linear-gradient(135deg, var(--journalist-color), var(--danger-dark));
+    color: white;
+}
+
+/* Блокнот журналиста */
+.notebook-panel {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: var(--space-lg);
+    min-height: 300px;
+}
+
+@media (max-width: 768px) {
+    .notebook-panel {
+        grid-template-columns: 1fr;
+    }
+}
+
+.notebook-entries {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    overflow-y: auto;
+}
+
+.notebook-entry {
+    padding: var(--space-md);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-sm);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.notebook-entry.active {
+    background: rgba(231, 76, 60, 0.1);
+    border-left-color: var(--journalist-color);
+}
+
+.notebook-entry:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.entry-title {
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+    color: var(--light-color);
+}
+
+.entry-date {
+    font-size: 0.8rem;
+    color: var(--gray-color);
+}
+
+.notebook-editor {
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-toolbar {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.editor-toolbar button {
+    background: rgba(231, 76, 60, 0.2);
+    border: 1px solid var(--journalist-color);
+    color: var(--light-color);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.editor-toolbar button:hover {
+    background: rgba(231, 76, 60, 0.3);
+}
+
+.notebook-content {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    color: var(--light-color);
+    font-family: var(--font-main);
+    resize: none;
+    min-height: 200px;
+}
+
+.notebook-content:focus {
+    outline: none;
+    border-color: var(--journalist-color);
+}
+
+/* Карта социальных связей */
+.network-map {
+    height: 300px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-lg);
+    border: 2px solid rgba(231, 76, 60, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.network-node {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: rgba(231, 76, 60, 0.2);
+    border: 2px solid var(--journalist-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.network-node:hover {
+    transform: scale(1.1);
+    background: rgba(231, 76, 60, 0.3);
+}
+
+.network-connection {
+    position: absolute;
+    background: rgba(231, 76, 60, 0.5);
+    height: 2px;
+    transform-origin: 0 0;
+}
+
+/* Доска слухов */
+.rumors-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--space-md);
+}
+
+.rumor-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.rumor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: var(--space-sm);
+}
+
+.rumor-source {
+    font-size: 0.8rem;
+    background: rgba(231, 76, 60, 0.2);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+}
+
+.rumor-reliability {
+    font-size: 0.8rem;
+    color: var(--warning-color);
+}
+
+.rumor-text {
+    font-size: 0.9rem;
+    color: var(--gray-color);
+    margin-bottom: var(--space-sm);
+}
+
+.rumor-actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.rumor-actions button {
+    flex: 1;
+    padding: var(--space-xs);
+    font-size: 0.8rem;
+}
+
+/* ==================== ИНТЕРФЕЙС ЧАСТНОГО ДЕТЕКТИВА ==================== */
+.private-eye-interface .role-header {
+    background: linear-gradient(135deg, rgba(243, 156, 18, 0.3), rgba(211, 84, 0, 0.3));
+    border-left: 4px solid var(--private-eye-color);
+}
+
+.private-eye-interface .role-icon {
+    background: linear-gradient(135deg, var(--private-eye-color), var(--warning-dark));
+    color: white;
+}
+
+/* Досье */
+.dossier-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-md);
+}
+
+.dossier-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    border: 1px solid rgba(243, 156, 18, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dossier-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--private-eye-color);
+    background: rgba(243, 156, 18, 0.1);
+}
+
+.dossier-photo {
+    width: 60px;
+    height: 60px;
+    background: rgba(243, 156, 18, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--space-sm);
+    color: var(--private-eye-color);
+    font-size: 1.5rem;
+}
+
+.dossier-name {
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+    color: var(--light-color);
+}
+
+.dossier-role {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--gray-color);
+    margin-bottom: var(--space-sm);
+}
+
+.dossier-motives {
+    font-size: 0.8rem;
+    color: var(--warning-color);
+    text-align: center;
+}
+
+/* Журнал наблюдения */
+.surveillance-log {
+    max-height: 300px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+}
+
+.log-entry {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+    margin-bottom: var(--space-sm);
+    border-left: 3px solid var(--private-eye-color);
+}
+
+.log-time {
+    font-size: 0.8rem;
+    color: var(--gray-color);
+    margin-bottom: var(--space-xs);
+}
+
+.log-content {
+    font-size: 0.9rem;
+    color: var(--light-color);
+}
+
+.log-subject {
+    color: var(--private-eye-color);
+    font-weight: 600;
+}
+
+/* Задание клиента */
+.client-brief {
+    background: rgba(243, 156, 18, 0.1);
+    border: 2px solid var(--private-eye-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    position: relative;
+}
+
+.client-brief::before {
+    content: "КОНФИДЕНЦИАЛЬНО";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--private-eye-color);
+    color: white;
+    padding: 2px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 0.7rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.client-objective {
+    font-weight: 600;
+    margin-bottom: var(--space-md);
+    color: var(--warning-color);
+}
+
+.client-notes {
+    font-size: 0.9rem;
+    color: var(--gray-color);
+    line-height: 1.5;
+}
+
+/* Кнопки специальных действий */
+.covert-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-md);
+}
+
+.covert-action {
+    padding: var(--space-md);
+    background: rgba(243, 156, 18, 0.1);
+    border: 2px solid var(--private-eye-color);
+    border-radius: var(--radius-md);
+    color: var(--light-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.covert-action:hover:not(:disabled) {
+    background: rgba(243, 156, 18, 0.2);
+    transform: translateY(-2px);
+}
+
+.covert-action:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: var(--gray-color);
+}
+
+.covert-action i {
+    font-size: 1.5rem;
+    color: var(--private-eye-color);
+}
+
+.covert-action .action-name {
+    font-weight: 600;
+}
+
+.covert-action .cooldown {
+    font-size: 0.8rem;
+    color: var(--warning-color);
+}
+
+/* ==================== ОБЩИЕ ЭЛЕМЕНТЫ ДЛЯ ВСЕХ РОЛЕЙ ==================== */
+
+/* Стили для улик в зависимости от типа */
+.clue-physical {
+    border-left-color: var(--primary-color) !important;
+}
+
+.clue-physical .evidence-type {
+    color: var(--primary-color);
+}
+
+.clue-document {
+    border-left-color: var(--secondary-color) !important;
+}
+
+.clue-document .evidence-type {
+    color: var(--secondary-color);
+}
+
+.clue-witness {
+    border-left-color: var(--warning-color) !important;
+}
+
+.clue-witness .evidence-type {
+    color: var(--warning-color);
+}
+
+.clue-digital {
+    border-left-color: var(--journalist-color) !important;
+}
+
+.clue-digital .evidence-type {
+    color: var(--journalist-color);
+}
+
+.clue-location {
+    border-left-color: var(--private-eye-color) !important;
+}
+
+.clue-location .evidence-type {
+    color: var(--private-eye-color);
+}
+
+/* Индикаторы способностей */
+.ability-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    margin-right: var(--space-xs);
+    margin-bottom: var(--space-xs);
+}
+
+.ability-indicator.available {
+    background: rgba(46, 204, 113, 0.2);
+    color: var(--secondary-color);
+}
+
+.ability-indicator.cooldown {
+    background: rgba(243, 156, 18, 0.2);
+    color: var(--warning-color);
+}
+
+.ability-indicator.disabled {
+    background: rgba(231, 76, 60, 0.2);
+    color: var(--danger-color);
+}
+
+/* Стили для контекстного меню */
+.context-menu {
+    position: fixed;
+    background: rgba(44, 62, 80, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    min-width: 150px;
+}
+
+.context-menu-item {
+    padding: var(--space-sm) var(--space-md);
+    color: var(--light-color);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.context-menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.context-menu-item i {
+    width: 16px;
+    text-align: center;
+}
+
+.context-menu-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: var(--space-xs) 0;
+}
+
+/* Анимации для ролевых элементов */
+@keyframes pulse-role {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(52, 152, 219, 0); }
+}
+
+.investigator-highlight {
+    animation: pulse-role 2s infinite;
+}
+
+@keyframes pulse-forensic {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
+}
+
+.forensic-highlight {
+    animation: pulse-forensic 2s infinite;
+}
+
+@keyframes pulse-journalist {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+}
+
+.journalist-highlight {
+    animation: pulse-journalist 2s infinite;
+}
+
+@keyframes pulse-private-eye {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(243, 156, 18, 0); }
+}
+
+.private-eye-highlight {
+    animation: pulse-private-eye 2s infinite;
+}
+
+/* Адаптивные стили для ролевых интерфейсов */
+@media (max-width: 768px) {
+    .role-section {
+        padding: var(--space-md);
+    }
+    
+    .documents-panel,
+    .request-panel,
+    .lab-tools,
+    .rumors-board,
+    .dossier-container,
+    .covert-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .notebook-panel {
+        grid-template-columns: 1fr;
+    }
+    
+    .network-map {
+        height: 200px;
+    }
+    
+    .microscope-display {
+        height: 150px;
+    }
+}
+
+/* Темы для разных ролей (можно переключать) */
+.theme-investigator {
+    --role-color: var(--investigator-color);
+    --role-color-dark: var(--primary-dark);
+}
+
+.theme-forensic {
+    --role-color: var(--forensic-color);
+    --role-color-dark: var(--secondary-dark);
+}
+
+.theme-journalist {
+    --role-color: var(--journalist-color);
+    --role-color-dark: var(--danger-dark);
+}
+
+.theme-private-eye {
+    --role-color: var(--private-eye-color);
+    --role-color-dark: var(--warning-dark);
+}
+
+/* Стили для выделенного текста в зависимости от роли */
+.role-text.investigator {
+    color: var(--investigator-color);
+    font-weight: 600;
+}
+
+.role-text.forensic {
+    color: var(--forensic-color);
+    font-weight: 600;
+}
+
+.role-text.journalist {
+    color: var(--journalist-color);
+    font-weight: 600;
+}
+
+.role-text.private-eye {
+    color: var(--private-eye-color);
+    font-weight: 600;
+}
+
+/* Иконки ролей в чате */
+.chat-role-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    margin-right: 4px;
+    font-size: 0.7rem;
+}
+
+.chat-role-icon.investigator {
+    background: var(--investigator-color);
+    color: white;
+}
+
+.chat-role-icon.forensic {
+    background: var(--forensic-color);
+    color: white;
+}
+
+.chat-role-icon.journalist {
+    background: var(--journalist-color);
+    color: white;
+}
+
+.chat-role-icon.private-eye {
+    background: var(--private-eye-color);
+    color: white;
+}
+
+/* Прогресс-бары для способностей */
+.ability-progress {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.ability-progress-fill {
+    height: 100%;
+    background: var(--role-color, var(--primary-color));
+    transition: width 1s linear;
+}
+
+/* Уведомления для ролей */
+.role-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-left: 4px solid var(--role-color, var(--primary-color));
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    max-width: 300px;
+    z-index: 1001;
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xs);
+    color: var(--role-color, var(--primary-color));
+    font-weight: 600;
+}
+
+.notification-message {
+    font-size: 0.9rem;
+    color: var(--light-color);
+}

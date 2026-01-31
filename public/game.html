@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detective Mastermind - Игра</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/roles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+        }
+        
+        .loading-screen h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .loading-screen p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+        }
+        
+        .loading-spinner {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Экран загрузки -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner">
+            <i class="fas fa-search fa-spin"></i>
+        </div>
+        <h1>Detective Mastermind</h1>
+        <p>Загрузка игры...</p>
+        <div class="loading-steps">
+            <div class="step active">
+                <i class="fas fa-check-circle"></i>
+                <span>Подключение к серверу</span>
+            </div>
+            <div class="step">
+                <i class="fas fa-circle"></i>
+                <span>Загрузка данных комнаты</span>
+            </div>
+            <div class="step">
+                <i class="fas fa-circle"></i>
+                <span>Подготовка интерфейса</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основной игровой интерфейс (скрыт до загрузки) -->
+    <div id="game-container" style="display: none;">
+        <!-- Шапка игры -->
+        <header class="game-header">
+            <div class="game-info">
+                <div class="room-info">
+                    <span class="room-id">
+                        <i class="fas fa-door-closed"></i>
+                        Комната: <strong id="room-id-display">000000</strong>
+                    </span>
+                    <span class="case-title">
+                        <i class="fas fa-folder"></i>
+                        Дело: <strong id="case-title">Загрузка...</strong>
+                    </span>
+                </div>
+                
+                <div class="timer-container">
+                    <div class="timer" id="game-timer">
+                        <i class="fas fa-clock"></i>
+                        <span id="timer-display">25:00</span>
+                    </div>
+                </div>
+                
+                <div class="player-info">
+                    <div class="role-badge" id="role-badge">
+                        <i class="fas fa-user-secret"></i>
+                        <span id="role-name">Загрузка роли...</span>
+                    </div>
+                    <div class="player-name">
+                        <i class="fas fa-user"></i>
+                        <span id="player-name">Игрок</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Основное содержимое -->
+        <main class="game-main">
+            <!-- Левая панель - информация о роли -->
+            <aside class="game-sidebar" id="role-sidebar">
+                <div class="role-card">
+                    <div class="role-header" id="role-header">
+                        <h3 id="role-title">Роль</h3>
+                        <div class="role-icon" id="role-icon">
+                            <i class="fas fa-user-secret"></i>
+                        </div>
+                    </div>
+                    <div class="role-description" id="role-description">
+                        Загрузка описания роли...
+                    </div>
+                    
+                    <div class="role-abilities" id="role-abilities">
+                        <h4><i class="fas fa-bolt"></i> Способности</h4>
+                        <ul id="abilities-list">
+                            <li>Загрузка способностей...</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="role-items" id="role-items">
+                        <h4><i class="fas fa-briefcase"></i> Инструменты</h4>
+                        <ul id="items-list">
+                            <li>Загрузка инструментов...</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Панель игроков -->
+                <div class="players-panel">
+                    <h4><i class="fas fa-users"></i> Игроки в комнате</h4>
+                    <div class="players-list" id="players-list">
+                        <!-- Список игроков будет заполнен JavaScript -->
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Центральная область - зависит от роли -->
+            <div class="game-content">
+                <!-- Лобби комнаты (до старта игры) -->
+                <div class="room-lobby" id="room-lobby">
+                    <div class="lobby-card">
+                        <h2><i class="fas fa-door-open"></i> Комната ожидания</h2>
+                        <p>Ожидание игроков... Нужно 4 человека для начала игры</p>
+                        
+                        <div class="players-ready">
+                            <h3>Готовность игроков</h3>
+                            <div class="ready-grid" id="ready-grid">
+                                <!-- Слоты готовности будут заполнены JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <div class="lobby-controls">
+                            <button id="ready-btn" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle"></i> Готов к расследованию
+                            </button>
+                            <button id="leave-room" class="btn btn-danger">
+                                <i class="fas fa-sign-out-alt"></i> Покинуть комнату
+                            </button>
+                        </div>
+                        
+                        <div class="countdown" id="countdown" style="display: none;">
+                            <h3>Игра начинается через:</h3>
+                            <div class="countdown-timer" id="countdown-timer">5</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Игровой интерфейс (скрыт до старта) -->
+                <div class="game-interface" id="game-interface" style="display: none;">
+                    <!-- Интерфейс будет динамически загружаться в зависимости от роли -->
+                    <div id="role-specific-interface">
+                        <!-- Здесь будет интерфейс для конкретной роли -->
+                    </div>
+                    
+                    <!-- Общие элементы игры -->
+                    <div class="case-info">
+                        <h3><i class="fas fa-file-alt"></i> Информация по делу</h3>
+                        <div class="case-details">
+                            <h4 id="case-name">Загрузка дела...</h4>
+                            <p id="case-description">Загрузка описания...</p>
+                            <div class="case-meta">
+                                <span class="crime-type">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Тип преступления: <strong id="crime-type">Загрузка...</strong>
+                                </span>
+                                <span class="difficulty">
+                                    <i class="fas fa-sliders-h"></i>
+                                    Сложность: <strong id="case-difficulty">Загрузка...</strong>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Правая панель - чат и улики -->
+            <aside class="game-chat">
+                <!-- Панель чата -->
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <h3><i class="fas fa-comments"></i> Чат расследования</h3>
+                        <div class="chat-controls">
+                            <button id="clear-chat" title="Очистить чат">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            <button id="toggle-chat" title="Свернуть чат">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages" id="chat-messages">
+                        <!-- Сообщения чата будут появляться здесь -->
+                        <div class="welcome-message">
+                            <p>Добро пожаловать в чат расследования!</p>
+                            <p>Обсуждайте улики, делитесь теориями, работайте вместе.</p>
+                            <p class="hint"><i class="fas fa-lightbulb"></i> Совет: Подписывайте свои сообщения ролью, чтобы другим было понятнее</p>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input">
+                        <input 
+                            type="text" 
+                            id="chat-input" 
+                            placeholder="Введите сообщение..."
+                            maxlength="500"
+                            disabled
+                        >
+                        <button id="send-message" class="btn btn-primary" disabled>
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="chat-info">
+                        <span id="typing-indicator"></span>
+                        <span class="char-count">
+                            <span id="char-count">0</span>/500
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Панель улик -->
+                <div class="evidence-panel">
+                    <div class="evidence-header">
+                        <h3><i class="fas fa-clipboard-list"></i> Ваши улики</h3>
+                        <div class="evidence-count">
+                            <span id="evidence-count">0</span> найдено
+                        </div>
+                    </div>
+                    
+                    <div class="evidence-list" id="evidence-list">
+                        <!-- Список улик будет заполнен JavaScript -->
+                        <div class="no-evidence">
+                            <i class="fas fa-search"></i>
+                            <p>Улики еще не найдены</p>
+                        </div>
+                    </div>
+                    
+                    <div class="evidence-actions">
+                        <button id="add-evidence" class="btn btn-secondary btn-small" disabled>
+                            <i class="fas fa-plus"></i> Добавить улику
+                        </button>
+                        <button id="review-evidence" class="btn btn-secondary btn-small" disabled>
+                            <i class="fas fa-eye"></i> Обзор
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Футер игры -->
+        <footer class="game-footer">
+            <div class="game-controls">
+                <button id="toggle-sidebar" class="btn btn-secondary btn-small">
+                    <i class="fas fa-bars"></i> Меню
+                </button>
+                <button id="game-help" class="btn btn-secondary btn-small">
+                    <i class="fas fa-question-circle"></i> Помощь
+                </button>
+                <button id="report-issue" class="btn btn-secondary btn-small">
+                    <i class="fas fa-flag"></i> Проблема
+                </button>
+            </div>
+            
+            <div class="game-stats">
+                <span class="stat">
+                    <i class="fas fa-lightbulb"></i>
+                    Теорий: <strong id="theories-count">0</strong>
+                </span>
+                <span class="stat">
+                    <i class="fas fa-clue"></i>
+                    Улики: <strong id="total-clues">0</strong>
+                </span>
+                <span class="stat">
+                    <i class="fas fa-user-friends"></i>
+                    Активные: <strong id="active-players">4</strong>/4
+                </span>
+            </div>
+            
+            <div class="connection-status">
+                <span id="game-connection-status" class="status-connected">
+                    <i class="fas fa-wifi"></i> Онлайн
+                </span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Модальные окна -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-question-circle"></i> Помощь по игре</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h3>Основные элементы управления</h3>
+                <ul>
+                    <li><strong>Чат:</strong> Введите сообщение и нажмите Enter или кнопку отправки</li>
+                    <li><strong>Улики:</strong> Кликните на улику для подробной информации</li>
+                    <li><strong>Интерфейс роли:</strong> Используйте специальные кнопки и инструменты в центральной панели</li>
+                    <li><strong>Игроки:</strong> Смотрите статус других игроков в правой панели</li>
+                </ul>
+                
+                <h3>Цель игры</h3>
+                <p>Работая в команде, соберите достаточно улик и определите, кто совершил преступление, как и почему.</p>
+                
+                <h3>Советы</h3>
+                <ul>
+                    <li>Делитесь информацией с командой</li>
+                    <li>Используйте свои уникальные способности</li>
+                    <li>Следите за временем</li>
+                    <li>Внимательно изучайте каждую улику</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="evidence-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-clipboard-check"></i> Улика</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="evidence-modal-body">
+                <!-- Содержимое будет заполнено JavaScript -->
+            </div>
+        </div>
+    </div>
+
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="js/socketClient.js"></script>
+    <script src="js/game.js"></script>
+    <!-- Файлы интерфейсов ролей будут загружены динамически -->
+</body>
+</html>

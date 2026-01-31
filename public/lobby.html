@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detective Mastermind - Лобби</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="lobby-page">
+    <div class="container">
+        <!-- Шапка -->
+        <header class="lobby-header">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user-secret"></i>
+                </div>
+                <div class="user-details">
+                    <h2 id="username-display">Загрузка...</h2>
+                    <div class="user-stats">
+                        <span class="stat">
+                            <i class="fas fa-chart-line"></i>
+                            Уровень: <strong id="user-level">1</strong>
+                        </span>
+                        <span class="stat">
+                            <i class="fas fa-star"></i>
+                            Опыт: <strong id="user-xp">0</strong>
+                        </span>
+                        <span class="stat">
+                            <i class="fas fa-trophy"></i>
+                            Дела: <strong id="user-cases">0</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lobby-controls">
+                <button id="refresh-rooms" class="btn btn-secondary" title="Обновить список">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button id="create-room" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i> Создать комнату
+                </button>
+                <button id="logout" class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </div>
+        </header>
+
+        <!-- Основное содержимое -->
+        <main class="lobby-main">
+            <div class="lobby-sidebar">
+                <!-- Статистика -->
+                <div class="stats-card">
+                    <h3><i class="fas fa-chart-bar"></i> Статистика</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="total-games">0</div>
+                            <div class="stat-label">Всего игр</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="success-rate">0%</div>
+                            <div class="stat-label">Успешность</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="avg-time">0м</div>
+                            <div class="stat-label">Среднее время</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Список друзей (заглушка) -->
+                <div class="friends-card">
+                    <h3><i class="fas fa-user-friends"></i> Онлайн друзья</h3>
+                    <div class="friends-list">
+                        <div class="no-friends">
+                            <i class="fas fa-user-plus"></i>
+                            <p>Добавьте друзей, чтобы играть вместе</p>
+                            <button class="btn btn-small" id="add-friends">
+                                <i class="fas fa-search"></i> Найти друзей
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Быстрый старт -->
+                <div class="quick-start-card">
+                    <h3><i class="fas fa-bolt"></i> Быстрый старт</h3>
+                    <p>Начните игру с случайными игроками</p>
+                    <button id="quick-start" class="btn btn-success btn-block">
+                        <i class="fas fa-play-circle"></i> Быстрая игра
+                    </button>
+                </div>
+            </div>
+
+            <!-- Основная область - список комнат -->
+            <div class="lobby-content">
+                <div class="rooms-header">
+                    <h2><i class="fas fa-door-open"></i> Доступные комнаты</h2>
+                    <div class="rooms-filter">
+                        <select id="room-filter">
+                            <option value="all">Все комнаты</option>
+                            <option value="waiting">Ожидание игроков</option>
+                            <option value="starting">Собираются</option>
+                        </select>
+                        <div class="rooms-count">
+                            <span id="rooms-count">0</span> комнат доступно
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Список комнат -->
+                <div class="rooms-container" id="rooms-list">
+                    <div class="no-rooms">
+                        <i class="fas fa-search"></i>
+                        <h3>Нет доступных комнат</h3>
+                        <p>Создайте свою комнату или подождите, пока кто-то создаст</p>
+                        <button id="create-first-room" class="btn btn-primary">
+                            <i class="fas fa-plus-circle"></i> Создать первую комнату
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Создание комнаты -->
+                <div class="create-room-card" id="create-room-form" style="display: none;">
+                    <h3><i class="fas fa-cogs"></i> Настройки комнаты</h3>
+                    <form id="room-settings-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="room-name">
+                                    <i class="fas fa-heading"></i> Название комнаты
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="room-name" 
+                                    placeholder="Например: 'Расследование века'"
+                                    maxlength="30"
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="room-difficulty">
+                                    <i class="fas fa-sliders-h"></i> Сложность
+                                </label>
+                                <select id="room-difficulty">
+                                    <option value="easy">Легкая</option>
+                                    <option value="normal" selected>Нормальная</option>
+                                    <option value="hard">Сложная</option>
+                                    <option value="expert">Эксперт</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="room-time">
+                                    <i class="fas fa-clock"></i> Лимит времени (минут)
+                                </label>
+                                <select id="room-time">
+                                    <option value="15">15 минут</option>
+                                    <option value="25" selected>25 минут</option>
+                                    <option value="35">35 минут</option>
+                                    <option value="45">45 минут</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="room-privacy">
+                                    <i class="fas fa-lock"></i> Приватность
+                                </label>
+                                <select id="room-privacy">
+                                    <option value="public" selected>Публичная</option>
+                                    <option value="private">Приватная</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="room-password-container" style="display: none;">
+                            <label for="room-password">
+                                <i class="fas fa-key"></i> Пароль комнаты
+                            </label>
+                            <input 
+                                type="password" 
+                                id="room-password" 
+                                placeholder="Пароль для входа"
+                            >
+                            <div class="form-hint">Только для приватных комнат</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="room-voice-enabled">
+                                <span class="checkmark"></span>
+                                Разрешить голосовой чат
+                            </label>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="cancel-create" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Отмена
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check-circle"></i> Создать комнату
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Шаблон комнаты (скрыт) -->
+                <template id="room-template">
+                    <div class="room-card">
+                        <div class="room-header">
+                            <div class="room-title">
+                                <h3 class="room-name">Название комнаты</h3>
+                                <div class="room-meta">
+                                    <span class="room-creator">
+                                        <i class="fas fa-crown"></i> Создатель
+                                    </span>
+                                    <span class="room-difficulty">
+                                        <i class="fas fa-sliders-h"></i> Сложность
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="room-status">
+                                <span class="status-badge waiting">
+                                    <i class="fas fa-user-clock"></i> Ожидание
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="room-body">
+                            <div class="room-players">
+                                <div class="players-count">
+                                    <i class="fas fa-users"></i>
+                                    <span class="current-players">1</span>/4
+                                </div>
+                                <div class="players-slots">
+                                    <!-- Слоты игроков будут заполнены JavaScript -->
+                                </div>
+                            </div>
+
+                            <div class="room-settings">
+                                <div class="setting">
+                                    <i class="fas fa-clock"></i>
+                                    <span class="time-limit">25 мин</span>
+                                </div>
+                                <div class="setting">
+                                    <i class="fas fa-lock"></i>
+                                    <span class="privacy">Публичная</span>
+                                </div>
+                                <div class="setting">
+                                    <i class="fas fa-microphone"></i>
+                                    <span class="voice-chat">Без голоса</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="room-footer">
+                            <button class="btn btn-primary btn-block join-room">
+                                <i class="fas fa-sign-in-alt"></i> Присоединиться
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </main>
+
+        <!-- Футер -->
+        <footer class="lobby-footer">
+            <div class="server-info">
+                <span class="online-count">
+                    <i class="fas fa-user"></i>
+                    Онлайн: <strong id="online-players">0</strong>
+                </span>
+                <span class="active-games">
+                    <i class="fas fa-gamepad"></i>
+                    Активные игры: <strong id="active-games">0</strong>
+                </span>
+            </div>
+            <div class="connection-status">
+                <span id="connection-status" class="status-connected">
+                    <i class="fas fa-wifi"></i> Подключено
+                </span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Модальное окно загрузки -->
+    <div id="loading-modal" class="modal">
+        <div class="modal-content loading-modal">
+            <div class="loading-spinner">
+                <i class="fas fa-search fa-spin"></i>
+            </div>
+            <h3 id="loading-message">Подключение к серверу...</h3>
+            <div class="loading-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно ошибки -->
+    <div id="error-modal" class="modal">
+        <div class="modal-content error-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-exclamation-triangle"></i> Ошибка</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="error-message">Произошла неизвестная ошибка</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="error-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="js/socketClient.js"></script>
+    <script src="js/lobby.js"></script>
+</body>
+</html>

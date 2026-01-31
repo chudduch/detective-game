@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detective Mastermind - Вход</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body class="auth-page">
+    <div class="container">
+        <header class="main-header">
+            <div class="logo">
+                <i class="fas fa-search"></i>
+                <h1>Detective Mastermind</h1>
+            </div>
+            <p class="tagline">Раскрой дело, прежде чем время истечет</p>
+        </header>
+
+        <main class="auth-container">
+            <div class="auth-tabs">
+                <button class="tab-btn active" data-tab="login">Вход</button>
+                <button class="tab-btn" data-tab="register">Регистрация</button>
+            </div>
+
+            <!-- Форма входа -->
+            <div id="login-form" class="auth-form active">
+                <h2><i class="fas fa-sign-in-alt"></i> Вход в систему</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="login-username">
+                            <i class="fas fa-user"></i> Имя пользователя
+                        </label>
+                        <input 
+                            type="text" 
+                            id="login-username" 
+                            placeholder="Введите ваше имя пользователя" 
+                            required
+                            autocomplete="username"
+                        >
+                        <div class="form-hint">От 3 до 20 символов (буквы, цифры, _, -)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-password">
+                            <i class="fas fa-lock"></i> Пароль
+                        </label>
+                        <input 
+                            type="password" 
+                            id="login-password" 
+                            placeholder="Введите ваш пароль" 
+                            required
+                            autocomplete="current-password"
+                        >
+                        <div class="form-hint">Минимум 6 символов</div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-unlock"></i> Войти
+                        </button>
+                    </div>
+
+                    <div class="form-footer">
+                        <p>Нет аккаунта? <a href="#" class="switch-to-register">Зарегистрируйтесь</a></p>
+                    </div>
+                </form>
+
+                <div class="demo-credentials">
+                    <h3><i class="fas fa-vial"></i> Тестовые аккаунты</h3>
+                    <div class="credentials-grid">
+                        <div class="credential">
+                            <strong>Следователь:</strong> detective / detective123
+                        </div>
+                        <div class="credential">
+                            <strong>Криминалист:</strong> forensic / forensic123
+                        </div>
+                        <div class="credential">
+                            <strong>Журналист:</strong> journalist / journalist123
+                        </div>
+                        <div class="credential">
+                            <strong>Частный детектив:</strong> private / private123
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Форма регистрации -->
+            <div id="register-form" class="auth-form">
+                <h2><i class="fas fa-user-plus"></i> Регистрация</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="register-username">
+                            <i class="fas fa-user"></i> Имя пользователя
+                        </label>
+                        <input 
+                            type="text" 
+                            id="register-username" 
+                            placeholder="Придумайте имя пользователя" 
+                            required
+                            autocomplete="username"
+                        >
+                        <div class="form-hint">От 3 до 20 символов (буквы, цифры, _, -)</div>
+                        <div id="username-availability" class="availability-status"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="register-password">
+                            <i class="fas fa-lock"></i> Пароль
+                        </label>
+                        <input 
+                            type="password" 
+                            id="register-password" 
+                            placeholder="Придумайте надежный пароль" 
+                            required
+                            autocomplete="new-password"
+                        >
+                        <div class="password-strength">
+                            <div class="strength-bar"></div>
+                            <span class="strength-text">Надежность пароля</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="register-confirm">
+                            <i class="fas fa-lock"></i> Подтверждение пароля
+                        </label>
+                        <input 
+                            type="password" 
+                            id="register-confirm" 
+                            placeholder="Повторите пароль" 
+                            required
+                            autocomplete="new-password"
+                        >
+                        <div id="password-match" class="match-status"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="register-email">
+                            <i class="fas fa-envelope"></i> Email (необязательно)
+                        </label>
+                        <input 
+                            type="email" 
+                            id="register-email" 
+                            placeholder="Ваш email для восстановления"
+                            autocomplete="email"
+                        >
+                        <div class="form-hint">Необязательное поле</div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success btn-block">
+                            <i class="fas fa-user-check"></i> Зарегистрироваться
+                        </button>
+                    </div>
+
+                    <div class="form-footer">
+                        <p>Уже есть аккаунт? <a href="#" class="switch-to-login">Войдите</a></p>
+                    </div>
+                </form>
+            </div>
+
+            <div class="game-features">
+                <h3><i class="fas fa-star"></i> Особенности игры</h3>
+                <div class="features-grid">
+                    <div class="feature">
+                        <i class="fas fa-users"></i>
+                        <h4>4 уникальные роли</h4>
+                        <p>Каждый игрок имеет особые способности и информацию</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-clock"></i>
+                        <h4>Ограниченное время</h4>
+                        <p>Решайте дела за 15-45 минут</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-brain"></i>
+                        <h4>Развивайте навыки</h4>
+                        <p>Аналитическое мышление, дедукция, работа в команде</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-trophy"></i>
+                        <h4>Система прогрессии</h4>
+                        <p>Повышайте уровень, открывайте новые дела</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="main-footer">
+            <p>Detective Mastermind &copy; 2023 | 
+                <a href="#" id="show-rules">Правила</a> | 
+                <a href="#" id="show-privacy">Конфиденциальность</a>
+            </p>
+            <div class="server-status">
+                <span class="status-indicator" id="server-status">
+                    <i class="fas fa-circle"></i> Проверка соединения...
+                </span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Модальные окна -->
+    <div id="rules-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-book"></i> Правила игры</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h3>Основные принципы</h3>
+                <ul>
+                    <li>Игра рассчитана на 4 игроков</li>
+                    <li>Каждый получает уникальную роль с особыми способностями</li>
+                    <li>Цель — раскрыть дело за ограниченное время</li>
+                    <li>Общайтесь через текстовый чат</li>
+                    <li>Собирайте улики и анализируйте их</li>
+                </ul>
+                
+                <h3>Этика</h3>
+                <ul>
+                    <li>Уважайте других игроков</li>
+                    <li>Не раскрывайте свою роль преждевременно</li>
+                    <li>Не используйте внешние средства коммуникации</li>
+                    <li>Сообщайте о неспортивном поведении</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="privacy-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-shield-alt"></i> Конфиденциальность</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Мы ценим вашу конфиденциальность. Все данные хранятся безопасно.</p>
+                <ul>
+                    <li>Пароли хранятся в зашифрованном виде</li>
+                    <li>Мы не передаем ваши данные третьим лицам</li>
+                    <li>История чатов хранится временно для модерации</li>
+                    <li>Вы можете удалить свой аккаунт в любое время</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="/js/socketClient.js"></script>
+	<script src="js/auth.js"></script>
+</body>
+</html>
